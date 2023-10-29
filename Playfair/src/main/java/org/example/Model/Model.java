@@ -2,129 +2,189 @@ package org.example.Model;
 import org.example.View.View;
 
 import java.util.*;
+
+/**
+ * The Model class provides the core functionality for the Playfair cipher application.
+ * It handles text preparation, key matrix generation, encryption, and decryption.
+ */
 public class Model {
-        private static String prepareText(String text) { //approved
-            return text.replaceAll("[^A-Za-z ]", "").toUpperCase();
-        }
+    /**
+     * Removes spaces and non-alphabetic characters from the given text and converts it to uppercase.
+     *
+     * @param text The text to be prepared.
+     * @return The prepared text in uppercase without spaces and non-alphabetic characters.
+     */
+    private String prepareText(String text) {
+        text = text.replaceAll("\\s+", "");
+        text = text.replaceAll("[^A-Za-z]", "").toUpperCase();
+        return text;
+    }
 
-    private static char[][] generateKeyMatrix(String key) { //approved
-            key = prepareText(key);
-            Set<Character> keySet = new HashSet<>();
-            char[][] keyMatrix = new char[5][5];
+    /**
+     * Generates a key matrix for the Playfair cipher based on the provided key.
+     *
+     * @param key The keyword used for generating the key matrix.
+     * @return The key matrix generated from the keyword.
+     */
+    private char[][] generateKeyMatrix(String key) {
+        key = prepareText(key);
+        Set<Character> keySet = new HashSet<>();
+        char[][] keyMatrix = new char[5][5];
 
-            String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWYZ";
+        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWYZ";
 
-            int index = 0;
-            for (int i = 0; i < 5; i++) {
-                for (int j = 0; j < 5; j++) {
-                    if (index < key.length()) {
-                        keyMatrix[i][j] = key.charAt(index);
-                        keySet.add(key.charAt(index));
-                        index++;
-                    } else {
-                        while (true) {
-                            char letter = alphabet.charAt(0);
-                            alphabet = alphabet.substring(1);
-                            if (!keySet.contains(letter)) {
-                                keyMatrix[i][j] = letter;
-                                keySet.add(letter);
-                                break;
-                            }
+        int index = 0;
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
+                if (index < key.length()) {
+                    keyMatrix[i][j] = key.charAt(index);
+                    keySet.add(key.charAt(index));
+                    index++;
+                } else {
+                    while (true) {
+                        char letter = alphabet.charAt(0);
+                        alphabet = alphabet.substring(1);
+                        if (!keySet.contains(letter)) {
+                            keyMatrix[i][j] = letter;
+                            keySet.add(letter);
+                            break;
                         }
                     }
                 }
             }
-
-            return keyMatrix;
         }
 
-        private static int[] findPosition(char[][] matrix, char letter) {
-            // Find the position of a letter in the matrix
-            for (int i = 0; i < 5; i++) {
-                for (int j = 0; j < 5; j++) {
-                    if (matrix[i][j] == letter) {
-                        return new int[]{i, j};
-                    }
+        return keyMatrix;
+    }
+
+    /**
+     * Finds the position of a letter in the given matrix.
+     *
+     * @param matrix The matrix in which to find the position of the letter.
+     * @param letter The letter to find in the matrix.
+     * @return An array of two integers representing the row and column of the letter in the matrix.
+     */
+    private int[] findPosition(char[][] matrix, char letter) {
+        // Find the position of a letter in the matrix
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
+                if (matrix[i][j] == letter) {
+                    return new int[]{i, j};
                 }
             }
-            return null;
+        }
+        return null;
+    }
+
+    /**
+     * Encrypts the given plaintext using the Playfair cipher algorithm.
+     *
+     * @param plaintext The plaintext to be encrypted.
+     * @param key The encryption key.
+     * @param separator The separator character used during encryption.
+     * @return The encrypted ciphertext.
+     * @throws NullPointerException If the provided 'plaintext' or 'key' is null.
+     */
+    private String playfairEncrypt(String plaintext, String key, char separator) {
+        // Check for null references
+        if (plaintext == null || key == null) {
+            throw new NullPointerException("Input 'plaintext' and 'key' must not be null.");
         }
 
+        plaintext = prepareText(plaintext);
+        separator = Character.toUpperCase(separator);
+        char[][] keyMatrix = generateKeyMatrix(key);
 
-
-        private static String playfairEncrypt(String plaintext, String key, char separator) {
-            plaintext = prepareText(plaintext);
-            char[][] keyMatrix = generateKeyMatrix(key);
-
-            // Replace double letters with separator
-            StringBuilder plaintextBuilder = new StringBuilder();
-            for (int i = 0; i < plaintext.length(); i += 2) {
-                char first = plaintext.charAt(i);
-                char second = (i + 1 < plaintext.length()) ? plaintext.charAt(i + 1) : separator;
-                if (first == second) {
-                    second = separator;
-                    i--;  // Repeat the current character
-                }
-                plaintextBuilder.append(first).append(second);
+        // Replace double letters with separator
+        StringBuilder plaintextBuilder = new StringBuilder();
+        for (int i = 0; i < plaintext.length(); i += 2) {
+            char first = plaintext.charAt(i);
+            char second = (i + 1 < plaintext.length()) ? plaintext.charAt(i + 1) : separator;
+            if (first == second) {
+                second = separator;
+                i--;  // Repeat the current character
             }
+            plaintextBuilder.append(first).append(second);
+        }
 
-            // Encrypt each pair
-            StringBuilder ciphertextBuilder = new StringBuilder();
-            for (int i = 0; i < plaintextBuilder.length(); i += 2) {
-                char first = plaintextBuilder.charAt(i);
-                char second = plaintextBuilder.charAt(i + 1);
-                int[] pos1 = findPosition(keyMatrix, first);
-                int[] pos2 = findPosition(keyMatrix, second);
+        // Encrypt each pair
+        StringBuilder ciphertextBuilder = new StringBuilder();
+        for (int i = 0; i < plaintextBuilder.length(); i += 2) {
+            char first = plaintextBuilder.charAt(i);
+            char second = plaintextBuilder.charAt(i + 1);
+            int[] pos1 = findPosition(keyMatrix, first);
+            int[] pos2 = findPosition(keyMatrix, second);
 
-                if (pos1[0] == pos2[0]) {
-                    ciphertextBuilder.append(keyMatrix[pos1[0]][(pos1[1] + 1) % 5]);
-                    ciphertextBuilder.append(keyMatrix[pos2[0]][(pos2[1] + 1) % 5]);
-                } else if (pos1[1] == pos2[1]) {
-                    ciphertextBuilder.append(keyMatrix[(pos1[0] + 1) % 5][pos1[1]]);
-                    ciphertextBuilder.append(keyMatrix[(pos2[0] + 1) % 5][pos2[1]]);
-                } else {
-                    ciphertextBuilder.append(keyMatrix[pos1[0]][pos2[1]]);
-                    ciphertextBuilder.append(keyMatrix[pos2[0]][pos1[1]]);
-                }
+            if (pos1[0] == pos2[0]) {
+                ciphertextBuilder.append(keyMatrix[pos1[0]][(pos1[1] + 1) % 5]);
+                ciphertextBuilder.append(keyMatrix[pos2[0]][(pos2[1] + 1) % 5]);
+            } else if (pos1[1] == pos2[1]) {
+                ciphertextBuilder.append(keyMatrix[(pos1[0] + 1) % 5][pos1[1]]);
+                ciphertextBuilder.append(keyMatrix[(pos2[0] + 1) % 5][pos2[1]]);
+            } else {
+                ciphertextBuilder.append(keyMatrix[pos1[0]][pos2[1]]);
+                ciphertextBuilder.append(keyMatrix[pos2[0]][pos1[1]]);
             }
-
-            return ciphertextBuilder.toString();
         }
 
-        private static String playfairDecrypt(String ciphertext, String key, char separator) {
-            char[][] keyMatrix = generateKeyMatrix(key);
+        return ciphertextBuilder.toString();
+    }
 
-            // Decrypt each pair
-            StringBuilder plaintextBuilder = new StringBuilder();
-            for (int i = 0; i < ciphertext.length(); i += 2) {
-                char first = ciphertext.charAt(i);
-                char second = ciphertext.charAt(i + 1);
-                int[] pos1 = findPosition(keyMatrix, first);
-                int[] pos2 = findPosition(keyMatrix, second);
 
-                if (pos1[0] == pos2[0]) {
-                    plaintextBuilder.append(keyMatrix[pos1[0]][(pos1[1] - 1 + 5) % 5]);
-                    plaintextBuilder.append(keyMatrix[pos2[0]][(pos2[1] - 1 + 5) % 5]);
-                } else if (pos1[1] == pos2[1]) {
-                    plaintextBuilder.append(keyMatrix[(pos1[0] - 1 + 5) % 5][pos1[1]]);
-                    plaintextBuilder.append(keyMatrix[(pos2[0] - 1 + 5) % 5][pos2[1]]);
-                } else {
-                    plaintextBuilder.append(keyMatrix[pos1[0]][pos2[1]]);
-                    plaintextBuilder.append(keyMatrix[pos2[0]][pos1[1]]);
-                }
+    /**
+     * Decrypts the given ciphertext using the Playfair cipher algorithm.
+     *
+     * @param ciphertext The ciphertext to be decrypted.
+     * @param key The encryption key.
+     * @param separator The separator character used during encryption.
+     * @return The decrypted plaintext.
+     * @throws NullPointerException If the provided 'ciphertext' or 'key' is null.
+     */
+    private String playfairDecrypt(String ciphertext, String key, char separator) {
+        // Check for null references
+        if (ciphertext == null || key == null) {
+            throw new NullPointerException("Input 'ciphertext' and 'key' must not be null.");
+        }
+
+        char[][] keyMatrix = generateKeyMatrix(key);
+
+        // Decrypt each pair
+        StringBuilder plaintextBuilder = new StringBuilder();
+        for (int i = 0; i < ciphertext.length(); i += 2) {
+            char first = ciphertext.charAt(i);
+            char second = ciphertext.charAt(i + 1);
+            int[] pos1 = findPosition(keyMatrix, first);
+            int[] pos2 = findPosition(keyMatrix, second);
+
+            if (pos1[0] == pos2[0]) {
+                plaintextBuilder.append(keyMatrix[pos1[0]][(pos1[1] - 1 + 5) % 5]);
+                plaintextBuilder.append(keyMatrix[pos2[0]][(pos2[1] - 1 + 5) % 5]);
+            } else if (pos1[1] == pos2[1]) {
+                plaintextBuilder.append(keyMatrix[(pos1[0] - 1 + 5) % 5][pos1[1]]);
+                plaintextBuilder.append(keyMatrix[(pos2[0] - 1 + 5) % 5][pos2[1]]);
+            } else {
+                plaintextBuilder.append(keyMatrix[pos1[0]][pos2[1]]);
+                plaintextBuilder.append(keyMatrix[pos2[0]][pos1[1]]);
             }
-
-            // Replace the separator with an empty string
-            return plaintextBuilder.toString().replace(String.valueOf(separator), "");
         }
 
-        public static void execute(){
+        // Replace the separator with an empty string
+        return plaintextBuilder.toString().replace(String.valueOf(separator), "");
+    }
 
-            View.enterData();
-            String ciphertext = Model.playfairEncrypt(View.getPlaintext(), View.getKeyword(), View.getSeparator());
-            System.out.println("Encrypted: " + ciphertext);
 
-            String decryptedText = Model.playfairDecrypt(ciphertext, View.getKeyword(), View.getSeparator());
-            System.out.println("Decrypted: " + decryptedText);
-        }
+    /**
+     * Executes the Playfair cipher application. It initializes the View, enters user data,
+     * performs encryption, and displays the results.
+     */
+    public void execute() {
+        View view = new View();
+        view.enterData();
+
+        String ciphertext = playfairEncrypt(view.getPlaintext(), view.getKeyword(), view.getSeparator());
+        System.out.println("Encrypted: " + ciphertext);
+
+        String decryptedText = playfairDecrypt(ciphertext, view.getKeyword(), view.getSeparator());
+        System.out.println("Decrypted: " + decryptedText);
+    }
 }

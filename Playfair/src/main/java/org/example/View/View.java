@@ -2,26 +2,76 @@ package org.example.View;
 
 import java.util.*;
 
+/**
+ * The View class provides a user interface for interacting with the Playfair cipher application.
+ * It allows users to input plaintext, a keyword, and a separator for encryption and decryption.
+ */
 public class View {
-    static Scanner scanner = new Scanner(System.in);
-    private static String plaintext;
-    private static String key;
-    private static char separator;
+    final Scanner scanner = new Scanner(System.in);
+    private String plaintext;
+    private String key;
+    private char separator;
 
-    static void enterPlaintext() {
+    /**
+     * Displays a prompt and allows the user to enter plaintext.
+     */
+    public void enterPlaintext() {
         System.out.println("Enter plaintext: ");
         plaintext = scanner.nextLine();
     }
 
-    static void enterKeyword() {
-        System.out.println("Enter keyword: ");
-        key = scanner.next();
+    /**
+     * Prompts the user to enter a keyword and ensures that the keyword does not contain repeating letters.
+     * If the keyword contains repeating letters, the user is prompted to enter the keyword again.
+     *
+     * @throws IllegalStateException If the user repeatedly enters a keyword with repeating letters.
+     */
+    public void enterKeyword() {
+        while (true) {
+            System.out.println("Enter keyword: ");
+            key = scanner.nextLine();
+
+            // Check if the keyword contains repeating letters
+            boolean hasRepeatingLetters = hasRepeatingLetters(key);
+
+            if (!hasRepeatingLetters) {
+                break; // Exit the loop if there are no repeating letters
+            } else {
+                System.err.println("Keyword cannot have two of the same letters. Please try again.");
+            }
+        }
     }
 
-    static void enterSeparator() {
+
+    /**
+     * Checks if the given keyword contains repeating letters.
+     *
+     * @param keyword The keyword to be checked.
+     * @return True if the keyword contains repeating letters, false otherwise.
+     */
+    private boolean hasRepeatingLetters(String keyword) {
+        Set<Character> repeated = new HashSet<>();
+        for (char letter : keyword.toCharArray()) {
+            if (repeated.contains(letter)) {
+                return true;
+            }
+            repeated.add(letter);
+        }
+        return false;
+    }
+
+
+
+    /**
+     * Displays a prompt and allows the user to enter a separator letter.
+     * The separator must be a single letter (A-Z or a-z).
+     *
+     * @throws IllegalStateException If the user repeatedly enters an invalid separator.
+     */
+    public void enterSeparator() {
         while (true) {
             System.out.println("Enter separator letter: ");
-            String separatorInput = scanner.next();
+            String separatorInput = scanner.nextLine();
 
             if (separatorInput.matches("[A-Za-z]") && separatorInput.length() == 1) {
                 separator = separatorInput.charAt(0);
@@ -30,21 +80,40 @@ public class View {
                 System.err.println("Separator must be a single letter. Please try again.");
             }
         }
-
     }
-    public static String getPlaintext(){
+
+    /**
+     * Retrieves the plaintext entered by the user.
+     *
+     * @return The plaintext entered by the user.
+     */
+    public String getPlaintext() {
         return plaintext;
     }
 
-    public static String getKeyword(){
+    /**
+     * Retrieves the keyword entered by the user.
+     *
+     * @return The keyword entered by the user.
+     */
+    public String getKeyword() {
         return key;
     }
 
-    public static char getSeparator() {
+    /**
+     * Retrieves the separator letter entered by the user.
+     *
+     * @return The separator letter entered by the user.
+     */
+    public char getSeparator() {
         return separator;
     }
 
-    public static void enterData(){
+    /**
+     * Facilitates the process of entering plaintext, keyword, and separator by invoking
+     * respective methods for user input.
+     */
+    public void enterData() {
         enterPlaintext();
         enterKeyword();
         enterSeparator();
