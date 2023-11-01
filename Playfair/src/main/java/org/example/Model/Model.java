@@ -1,5 +1,4 @@
 package org.example.Model;
-import org.example.View.View;
 
 import java.util.*;
 
@@ -31,7 +30,7 @@ public class Model {
         Set<Character> keySet = new HashSet<>();
         char[][] keyMatrix = new char[5][5];
 
-        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWYZ";
+        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWYZ"; //without X
 
         int index = 0;
         for (int i = 0; i < 5; i++) {
@@ -65,7 +64,6 @@ public class Model {
      * @return An array of two integers representing the row and column of the letter in the matrix.
      */
     private int[] findPosition(char[][] matrix, char letter) {
-        // Find the position of a letter in the matrix
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 5; j++) {
                 if (matrix[i][j] == letter) {
@@ -83,12 +81,12 @@ public class Model {
      * @param key The encryption key.
      * @param separator The separator character used during encryption.
      * @return The encrypted ciphertext.
-     * @throws NullPointerException If the provided 'plaintext' or 'key' is null.
+     * @throws NullException If the provided 'plaintext' or 'key' is null.
      */
-    private String playfairEncrypt(String plaintext, String key, char separator) {
+    private String playfairEncrypt(String plaintext, String key, char separator) throws NullException{
         // Check for null references
         if (plaintext == null || key == null) {
-            throw new NullPointerException("Input 'plaintext' and 'key' must not be null.");
+            throw new NullException("Input 'plaintext' and 'key' must not be null.");
         }
 
         plaintext = prepareText(plaintext);
@@ -102,12 +100,11 @@ public class Model {
             char second = (i + 1 < plaintext.length()) ? plaintext.charAt(i + 1) : separator;
             if (first == second) {
                 second = separator;
-                i--;  // Repeat the current character
+                i--;
             }
             plaintextBuilder.append(first).append(second);
         }
 
-        // Encrypt each pair
         StringBuilder ciphertextBuilder = new StringBuilder();
         for (int i = 0; i < plaintextBuilder.length(); i += 2) {
             char first = plaintextBuilder.charAt(i);
@@ -138,12 +135,12 @@ public class Model {
      * @param key The encryption key.
      * @param separator The separator character used during encryption.
      * @return The decrypted plaintext.
-     * @throws NullPointerException If the provided 'ciphertext' or 'key' is null.
+     * @throws NullException If the provided 'ciphertext' or 'key' is null.
      */
-    private String playfairDecrypt(String ciphertext, String key, char separator) {
+    private String playfairDecrypt(String ciphertext, String key, char separator) throws NullException{
         // Check for null references
         if (ciphertext == null || key == null) {
-            throw new NullPointerException("Input 'ciphertext' and 'key' must not be null.");
+            throw new NullException("Input 'ciphertext' and 'key' must not be null.");
         }
 
         char[][] keyMatrix = generateKeyMatrix(key);
@@ -173,18 +170,30 @@ public class Model {
     }
 
 
-    /**
-     * Executes the Playfair cipher application. It initializes the View, enters user data,
-     * performs encryption, and displays the results.
-     */
-    public void execute() {
-        View view = new View();
-        view.enterData();
-
-        String ciphertext = playfairEncrypt(view.getPlaintext(), view.getKeyword(), view.getSeparator());
-        System.out.println("Encrypted: " + ciphertext);
-
-        String decryptedText = playfairDecrypt(ciphertext, view.getKeyword(), view.getSeparator());
-        System.out.println("Decrypted: " + decryptedText);
+   /**
+    * Encrypts the provided plaintext using the Playfair cipher algorithm.
+    *
+    * @param plaintext  The plaintext to be encrypted.
+    * @param key        The encryption key.
+    * @param separator  The separator character used during encryption.
+    * @return The encrypted ciphertext.
+    * @throws NullException If the provided 'plaintext' or 'key' is null.
+    */
+    public String getPlayfairEncrypt(String plaintext, String key, char separator) throws NullException {
+        return playfairEncrypt(plaintext, key, separator);
     }
+
+    /**
+    * Decrypts the provided ciphertext using the Playfair cipher algorithm.
+    *
+    * @param ciphertext The ciphertext to be decrypted.
+    * @param key        The encryption key.
+    * @param separator  The separator character used during encryption.
+    * @return The decrypted plaintext.
+    * @throws NullException If the provided 'ciphertext' or 'key' is null.
+    */
+    public String getPlayfairDecrypt(String ciphertext, String key, char separator) throws NullException {
+       return playfairDecrypt(ciphertext, key, separator);
+    }
+
 }

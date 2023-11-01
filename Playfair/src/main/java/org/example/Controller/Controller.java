@@ -1,5 +1,5 @@
 package org.example.Controller;
-import org.example.Model.Model;
+import org.example.View.View;
 
 /**
  * @author Sebastian Malisz
@@ -14,8 +14,8 @@ public class Controller {
      * @param args The command-line arguments (not used in this application).
      */
     public static void main(String[] args) {
-        Model model = new Model();
-        model.execute();
+        View view = new View();
+        view.execute(); 
     }
 }
 

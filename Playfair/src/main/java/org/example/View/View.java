@@ -1,6 +1,9 @@
 package org.example.View;
+import org.example.Model.Model;
+import org.example.Model.NullException;
 
 import java.util.*;
+
 
 /**
  * The View class provides a user interface for interacting with the Playfair cipher application.
@@ -15,9 +18,18 @@ public class View {
     /**
      * Displays a prompt and allows the user to enter plaintext.
      */
-    public void enterPlaintext() {
-        System.out.println("Enter plaintext: ");
-        plaintext = scanner.nextLine();
+    private void enterPlaintext() {
+        System.out.println("Plaintext cannot include X");
+        while(true){
+            System.out.println("Enter plaintext: ");
+            plaintext = scanner.nextLine();
+        
+            if(plaintext.toUpperCase().contains("X")){
+                System.out.println("Plaintext cannot include 'X'. Please try again.");
+            }else{
+                break;
+            }
+        }
     }
 
     /**
@@ -26,7 +38,7 @@ public class View {
      *
      * @throws IllegalStateException If the user repeatedly enters a keyword with repeating letters.
      */
-    public void enterKeyword() {
+    private void enterKeyword() {
         while (true) {
             System.out.println("Enter keyword: ");
             key = scanner.nextLine();
@@ -68,7 +80,7 @@ public class View {
      *
      * @throws IllegalStateException If the user repeatedly enters an invalid separator.
      */
-    public void enterSeparator() {
+    private void enterSeparator() {
         while (true) {
             System.out.println("Enter separator letter: ");
             String separatorInput = scanner.nextLine();
@@ -87,7 +99,7 @@ public class View {
      *
      * @return The plaintext entered by the user.
      */
-    public String getPlaintext() {
+    private String getPlaintext() {
         return plaintext;
     }
 
@@ -96,7 +108,7 @@ public class View {
      *
      * @return The keyword entered by the user.
      */
-    public String getKeyword() {
+    private String getKeyword() {
         return key;
     }
 
@@ -105,7 +117,7 @@ public class View {
      *
      * @return The separator letter entered by the user.
      */
-    public char getSeparator() {
+    private char getSeparator() {
         return separator;
     }
 
@@ -113,9 +125,29 @@ public class View {
      * Facilitates the process of entering plaintext, keyword, and separator by invoking
      * respective methods for user input.
      */
-    public void enterData() {
+    private void enterData() {
         enterPlaintext();
         enterKeyword();
         enterSeparator();
+    }
+    
+    /**
+    * Executes the Playfair cipher application. This method initializes the View and Model components,
+    * collects user data, performs encryption, and displays the results.
+    */
+    public void execute() {
+        try {
+            View view = new View();
+            Model model = new Model();
+        
+            view.enterData();
+        
+            String ciphertext = model.getPlayfairEncrypt(view.getPlaintext(), view.getKeyword(), view.getSeparator());
+            System.out.println("Encrypted: " + ciphertext);
+            String decryptedText = model.getPlayfairDecrypt(ciphertext, view.getKeyword(), view.getSeparator());
+            System.out.println("Decrypted: " + decryptedText);
+        } catch (NullException ex) {
+            System.err.println(ex.getMessage());
+        }
     }
 }
