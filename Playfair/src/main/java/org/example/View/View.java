@@ -99,7 +99,7 @@ public class View {
      *
      * @return The plaintext entered by the user.
      */
-    private String getPlaintext() {
+    public String getPlaintext() {
         return plaintext;
     }
 
@@ -108,7 +108,7 @@ public class View {
      *
      * @return The keyword entered by the user.
      */
-    private String getKeyword() {
+    public String getKeyword() {
         return key;
     }
 
@@ -117,7 +117,7 @@ public class View {
      *
      * @return The separator letter entered by the user.
      */
-    private char getSeparator() {
+    public char getSeparator() {
         return separator;
     }
 
@@ -136,12 +136,12 @@ public class View {
     * collects user data, performs encryption, and displays the results.
     */
     public void execute() {
+        View view = new View();
+        Model model = new Model();
+        
+        view.enterData();
+        
         try {
-            View view = new View();
-            Model model = new Model();
-        
-            view.enterData();
-        
             String ciphertext = model.getPlayfairEncrypt(view.getPlaintext(), view.getKeyword(), view.getSeparator());
             System.out.println("Encrypted: " + ciphertext);
             String decryptedText = model.getPlayfairDecrypt(ciphertext, view.getKeyword(), view.getSeparator());
