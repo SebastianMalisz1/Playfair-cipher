@@ -1,2 +1,2 @@
 # Playfair-cipher
-University sem. V project in progress
+University sem. V project
